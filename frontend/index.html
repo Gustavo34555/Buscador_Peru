@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buscador de Personas</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-2: #11182b;
+      --panel: rgba(17, 24, 39, 0.78);
+      --panel-strong: rgba(15, 23, 42, 0.92);
+      --panel-soft: rgba(30, 41, 59, 0.65);
+      --border: rgba(148, 163, 184, 0.18);
+      --text: #eef2ff;
+      --muted: #9fb0d1;
+      --primary: #60a5fa;
+      --primary-strong: #3b82f6;
+      --accent: #22c55e;
+      --pink: #ec4899;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      --radius: 22px;
+      --radius-sm: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(236, 72, 153, 0.16), transparent 22%),
+        radial-gradient(circle at bottom center, rgba(34, 197, 94, 0.12), transparent 24%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1320px, calc(100% - 28px));
+      margin: 28px auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .hero-card,
+    .mini-card,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero-card {
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -80px -80px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96, 165, 250, .22), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .hero-title h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    }
+
+    .hero-title p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 60ch;
+      font-size: 1rem;
+    }
+
+    .hero-status {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 18px;
+    }
+
+    .mini-card {
+      padding: 18px;
+    }
+
+    .mini-card .k {
+      color: var(--muted);
+      font-size: .84rem;
+      margin-bottom: 8px;
+    }
+
+    .mini-card .v {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 18px;
+    }
+
+    .panel-header {
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+    }
+
+    .panel-header h2 {
+      margin: 0 0 6px;
+      font-size: 1.12rem;
+    }
+
+    .panel-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .94rem;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: .92rem;
+      font-weight: 700;
+      color: #e5edff;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.88);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 15px;
+      outline: none;
+      font-size: 15px;
+      transition: .18s ease;
+    }
+
+    input::placeholder {
+      color: #7f90b7;
+    }
+
+    input:focus {
+      border-color: rgba(96, 165, 250, .7);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.14);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: .96rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+      color: white;
+      flex: 1;
+      box-shadow: 0 12px 28px rgba(59,130,246,.28);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,.05);
+      color: #e5e7eb;
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,.08);
+    }
+
+    .error {
+      color: #fda4af;
+      font-size: .92rem;
+      font-weight: 700;
+      min-height: 18px;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: .89rem;
+      line-height: 1.55;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      flex: 1;
+      min-width: 140px;
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .stat .k {
+      color: var(--muted);
+      font-size: .8rem;
+      margin-bottom: 5px;
+    }
+
+    .stat .v {
+      font-weight: 800;
+      font-size: 1.02rem;
+    }
+
+    .empty {
+      border: 1px dashed var(--border);
+      border-radius: 18px;
+      padding: 28px 18px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255,255,255,.02);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      margin-bottom: 16px;
+      background: rgba(255,255,255,.02);
+    }
+
+    table.results {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 840px;
+    }
+
+    table.results thead th {
+      background: rgba(255,255,255,.04);
+      color: #dbe7ff;
+      text-align: left;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: .84rem;
+      letter-spacing: .02em;
+    }
+
+    table.results tbody td {
+      padding: 13px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      vertical-align: top;
+    }
+
+    table.results tbody tr {
+      cursor: pointer;
+      transition: .15s ease;
+    }
+
+    table.results tbody tr:hover {
+      background: rgba(96, 165, 250, 0.08);
+    }
+
+    table.results tbody tr.active {
+      background: rgba(96, 165, 250, 0.14);
+    }
+
+    .person-name {
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: .82rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+
+    .badge-age {
+      background: rgba(34,197,94,.12);
+      border-color: rgba(34,197,94,.22);
+      color: #86efac;
+    }
+
+    .badge-male {
+      background: rgba(59,130,246,.14);
+      border-color: rgba(59,130,246,.24);
+      color: #93c5fd;
+    }
+
+    .badge-female {
+      background: rgba(236,72,153,.14);
+      border-color: rgba(236,72,153,.24);
+      color: #f9a8d4;
+    }
+
+    .detail-hero {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .detail-main,
+    .detail-side {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+    }
+
+    .detail-main h3 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .detail-main p {
+      margin: 0;
+      color: #d5e1fb;
+    }
+
+    .detail-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .ficha-wrap {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: auto;
+      background: rgba(255,255,255,.02);
+    }
+
+    table.ficha {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    table.ficha caption {
+      text-align: left;
+      padding: 16px 18px;
+      color: var(--muted);
+      font-size: .92rem;
+      caption-side: top;
+    }
+
+    table.ficha td {
+      border: 1px solid var(--border);
+      padding: 16px 18px;
+      vertical-align: top;
+    }
+
+    table.ficha td.label {
+      width: 240px;
+      font-weight: 800;
+      color: #f8fafc;
+      background: rgba(255,255,255,.035);
+    }
+
+    table.ficha td.value {
+      color: #d8e2f4;
+      word-break: break-word;
+      background: rgba(255,255,255,.015);
+    }
+
+    .json-box {
+      margin-top: 14px;
+      background: rgba(2, 6, 23, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      max-height: 260px;
+      overflow: auto;
+      color: #9ef7b6;
+      font-size: .88rem;
+    }
+
+    @media (max-width: 1100px) {
+      .hero,
+      .layout,
+      .detail-hero {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .container {
+        width: min(100% - 16px, 100%);
+      }
+
+      .row {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="hero-title">
+          <div>
+            <h1>Buscador de Personas</h1>
+            <p>Consulta por DNI, busca por nombres y apellidos, y revisa una ficha completa con mejor presentación visual.</p>
+          </div>
+        </div>
+
+        <div class="hero-status">
+          <div class="chip" id="apiStatus">API: verificando...</div>
+          <div class="chip" id="lastSearch">Última búsqueda: -</div>
+        </div>
+      </div>
+
+      <div class="hero-side">
+        <div class="mini-card">
+          <div class="k">Resultados</div>
+          <div class="v" id="totalResults">0</div>
+        </div>
+        <div class="mini-card">
+          <div class="k">DNI seleccionado</div>
+          <div class="v" id="selectedDni">-</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Buscar</h2>
+          <p>Usa DNI o nombre completo para encontrar personas rápidamente.</p>
+        </div>
+
+        <div class="panel-body">
+          <div class="stack">
+            <div class="field">
+              <label for="dniInput">DNI</label>
+              <input type="text" id="dniInput">
+              <div class="error" id="dniError"></div>
+            </div>
+
+            <div class="row">
+              <button class="btn-primary" id="btnDni">Buscar por DNI</button>
+            </div>
+
+            <div class="field">
+              <label for="textoInput">Nombre o apellido</label>
+              <input type="text" id="textoInput">
+            </div>
+
+            <div class="field">
+              <label for="limitInput">Límite</label>
+              <input type="number" id="limitInput" min="1" max="100" value="20">
+              <div class="error" id="textoError"></div>
+            </div>
+
+            <div class="row">
+              <button class="btn-primary" id="btnTexto">Buscar personas</button>
+              <button class="btn-secondary" id="btnLimpiar">Limpiar</button>
+            </div>
+
+            <div class="helper">
+              Los ejemplos dentro de los campos cambian aleatoriamente y los resultados muestran una ficha completa con sexo legible.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Resultados y ficha</h2>
+          <p>Selecciona un registro para ver todos los datos disponibles.</p>
+        </div>
+
+        <div class="panel-body">
+          <div class="stats-row">
+            <div class="stat">
+              <div class="k">Estado</div>
+              <div class="v">Búsqueda activa</div>
+            </div>
+            <div class="stat">
+              <div class="k">Vista</div>
+              <div class="v">Detalle completo</div>
+            </div>
+          </div>
+
+          <div id="tablaContenedor" class="empty">Todavía no hay resultados.</div>
+          <div id="detalleContenedor" class="empty">Selecciona una persona para ver la ficha completa.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+
+    const dniEjemplos = ["74544799", "00890434", "71452368", "45127896"];
+    const textoEjemplos = ["Lucía Quispe", "Mario Huamán", "Elena Soto", "Jorge Mamani"];
+
+    const dniInput = document.getElementById("dniInput");
+    const textoInput = document.getElementById("textoInput");
+    const limitInput = document.getElementById("limitInput");
+
+    const dniError = document.getElementById("dniError");
+    const textoError = document.getElementById("textoError");
+
+    const apiStatus = document.getElementById("apiStatus");
+    const lastSearch = document.getElementById("lastSearch");
+    const totalResults = document.getElementById("totalResults");
+    const selectedDni = document.getElementById("selectedDni");
+
+    const tablaContenedor = document.getElementById("tablaContenedor");
+    const detalleContenedor = document.getElementById("detalleContenedor");
+
+    let resultadosActuales = [];
+    let dniActivo = null;
+
+    dniInput.placeholder = dniEjemplos[Math.floor(Math.random() * dniEjemplos.length)];
+    textoInput.placeholder = textoEjemplos[Math.floor(Math.random() * textoEjemplos.length)];
+
+    function escapeHtml(valor) {
+      return String(valor ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function valor(v) {
+      return v === null || v === undefined || v === "" ? "-" : v;
+    }
+
+    function sexoBadge(sexo) {
+      const s = String(sexo || "").toLowerCase();
+      if (s === "masculino") {
+        return `<span class="badge badge-male">Masculino</span>`;
+      }
+      if (s === "femenino") {
+        return `<span class="badge badge-female">Femenino</span>`;
+      }
+      return `<span class="badge">${escapeHtml(valor(sexo))}</span>`;
+    }
+
+    async function verificarAPI() {
+      try {
+        const resp = await fetch(`${API_BASE}/`);
+        if (!resp.ok) throw new Error();
+        apiStatus.textContent = "API: en línea";
+        apiStatus.style.color = "#86efac";
+      } catch {
+        apiStatus.textContent = "API: sin conexión";
+        apiStatus.style.color = "#fca5a5";
+      }
+    }
+
+    function limpiarErrores() {
+      dniError.textContent = "";
+      textoError.textContent = "";
+    }
+
+    function renderDetalle(persona) {
+      if (!persona) {
+        detalleContenedor.className = "empty";
+        detalleContenedor.innerHTML = "Selecciona una persona para ver la ficha completa.";
+        selectedDni.textContent = "-";
+        return;
+      }
+
+      const nombreCompleto = [persona.nombres, persona.ap_pat, persona.ap_mat].filter(Boolean).join(" ");
+      selectedDni.textContent = persona.dni || "-";
+      detalleContenedor.className = "";
+
+      detalleContenedor.innerHTML = `
+        <div class="detail-hero">
+          <div class="detail-main">
+            <h3>${escapeHtml(nombreCompleto || "Sin nombre")}</h3>
+            <p>DNI: ${escapeHtml(valor(persona.dni))}</p>
+            <div class="detail-tags">
+              <span class="badge badge-age">${escapeHtml(valor(persona.edad_texto))}</span>
+              ${sexoBadge(persona.sexo)}
+              <span class="badge">${escapeHtml(valor(persona.est_civil))}</span>
+            </div>
+          </div>
+
+          <div class="detail-side">
+            <div class="sub" style="margin-bottom:8px;">Resumen rápido</div>
+            <div><strong>Dirección:</strong> ${escapeHtml(valor(persona.direccion))}</div>
+            <div style="margin-top:8px;"><strong>Origen:</strong> ${escapeHtml(valor(persona.ubigeo_nac))}</div>
+            <div style="margin-top:8px;"><strong>Ubigeo Dirección:</strong> ${escapeHtml(valor(persona.ubigeo_dir))}</div>
+          </div>
+        </div>
+
+        <div class="ficha-wrap">
+          <table class="ficha">
+            <caption>Ficha completa de la persona</caption>
+            <tbody>
+              <tr><td class="label">DNI</td><td class="value">${escapeHtml(valor(persona.dni))}</td></tr>
+              <tr><td class="label">Nombres</td><td class="value">${escapeHtml(valor(persona.nombres))}</td></tr>
+              <tr><td class="label">Apellido Paterno</td><td class="value">${escapeHtml(valor(persona.ap_pat))}</td></tr>
+              <tr><td class="label">Apellido Materno</td><td class="value">${escapeHtml(valor(persona.ap_mat))}</td></tr>
+              <tr><td class="label">Padre</td><td class="value">${escapeHtml(valor(persona.padre))}</td></tr>
+              <tr><td class="label">Madre</td><td class="value">${escapeHtml(valor(persona.madre))}</td></tr>
+              <tr><td class="label">Fecha Nacimiento</td><td class="value">${escapeHtml(valor(persona.fecha_nac))}</td></tr>
+              <tr><td class="label">Fecha Emisión</td><td class="value">${escapeHtml(valor(persona.fch_emision))}</td></tr>
+              <tr><td class="label">Fecha Inscripción</td><td class="value">${escapeHtml(valor(persona.fch_inscripcion))}</td></tr>
+              <tr><td class="label">Fecha Caducidad</td><td class="value">${escapeHtml(valor(persona.fch_caducidad))}</td></tr>
+              <tr><td class="label">Dirección</td><td class="value">${escapeHtml(valor(persona.direccion))}</td></tr>
+              <tr><td class="label">Edad</td><td class="value">${escapeHtml(valor(persona.edad_texto))}</td></tr>
+              <tr><td class="label">Origen</td><td class="value">${escapeHtml(valor(persona.ubigeo_nac))}</td></tr>
+              <tr><td class="label">Estado Civil</td><td class="value">${escapeHtml(valor(persona.est_civil))}</td></tr>
+              <tr><td class="label">Sexo</td><td class="value">${sexoBadge(persona.sexo)}</td></tr>
+              <tr><td class="label">Ubigeo Dirección</td><td class="value">${escapeHtml(valor(persona.ubigeo_dir))}</td></tr>
+              <tr><td class="label">Dígito RUC</td><td class="value">${escapeHtml(valor(persona.dig_ruc))}</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <pre class="json-box">${escapeHtml(JSON.stringify(persona, null, 2))}</pre>
+      `;
+    }
+
+    function renderTabla(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        totalResults.textContent = "0";
+        tablaContenedor.className = "empty";
+        tablaContenedor.innerHTML = "No se encontraron coincidencias.";
+        return;
+      }
+
+      totalResults.textContent = String(data.length);
+      tablaContenedor.className = "table-wrap";
+      tablaContenedor.innerHTML = `
+        <table class="results">
+          <thead>
+            <tr>
+              <th>DNI</th>
+              <th>Persona</th>
+              <th>Sexo</th>
+              <th>Edad</th>
+              <th>Dirección</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(persona => {
+              const nombre = [persona.nombres, persona.ap_pat, persona.ap_mat].filter(Boolean).join(" ");
+              return `
+                <tr class="${dniActivo === persona.dni ? "active" : ""}" data-dni="${escapeHtml(persona.dni || "")}">
+                  <td>${escapeHtml(valor(persona.dni))}</td>
+                  <td>
+                    <div class="person-name">${escapeHtml(valor(nombre))}</div>
+                    <div class="sub">${escapeHtml(valor(persona.fecha_nac))}</div>
+                  </td>
+                  <td>${sexoBadge(persona.sexo)}</td>
+                  <td><span class="badge badge-age">${escapeHtml(valor(persona.edad_texto))}</span></td>
+                  <td>${escapeHtml(valor(persona.direccion))}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+
+      tablaContenedor.querySelectorAll("tbody tr").forEach(row => {
+        row.addEventListener("click", async () => {
+          const dni = row.getAttribute("data-dni");
+          if (dni) {
+            await buscarPorDni(dni, false);
+          }
+        });
+      });
+    }
+
+    async function buscarPorDni(dniManual = null, actualizarInput = true) {
+      limpiarErrores();
+
+      const dni = (dniManual ?? dniInput.value).trim();
+      if (!dni) {
+        dniError.textContent = "Ingresa un DNI válido.";
+        return;
+      }
+
+      if (actualizarInput) dniInput.value = dni;
+      lastSearch.textContent = `Última búsqueda: DNI ${dni}`;
+
+      try {
+        const resp = await fetch(`${API_BASE}/persona/${encodeURIComponent(dni)}`);
+        const data = await resp.json();
+
+        if (!resp.ok) throw new Error(data.detail || "No se pudo consultar");
+
+        dniActivo = data.dni || null;
+        renderDetalle(data);
+
+        const existe = resultadosActuales.some(x => x.dni === data.dni);
+        if (!existe) resultadosActuales = [data, ...resultadosActuales];
+
+        renderTabla(resultadosActuales);
+      } catch (e) {
+        dniError.textContent = e.message || "Error de conexión";
+      }
+    }
+
+    async function buscarPorTexto() {
+      limpiarErrores();
+
+      const q = textoInput.value.trim();
+      const limit = limitInput.value.trim() || "20";
+
+      if (!q) {
+        textoError.textContent = "Ingresa un nombre o apellido.";
+        return;
+      }
+
+      lastSearch.textContent = `Última búsqueda: ${q}`;
+      tablaContenedor.className = "empty";
+      tablaContenedor.innerHTML = "Buscando coincidencias...";
+
+      try {
+        const params = new URLSearchParams();
+        params.set("q", q);
+        params.set("limit", limit);
+
+        const resp = await fetch(`${API_BASE}/buscar?${params.toString()}`);
+        const data = await resp.json();
+
+        if (!resp.ok) throw new Error(data.detail || "No se pudo buscar");
+
+        resultadosActuales = Array.isArray(data) ? data : [];
+        renderTabla(resultadosActuales);
+
+        if (resultadosActuales.length > 0) {
+          await buscarPorDni(resultadosActuales[0].dni, false);
+        } else {
+          renderDetalle(null);
+        }
+      } catch (e) {
+        textoError.textContent = e.message || "Error de conexión";
+        tablaContenedor.className = "empty";
+        tablaContenedor.innerHTML = "No se pudo completar la búsqueda.";
+      }
+    }
+
+    function limpiarTodo() {
+      dniInput.value = "";
+      textoInput.value = "";
+      limitInput.value = 20;
+      limpiarErrores();
+      resultadosActuales = [];
+      dniActivo = null;
+      totalResults.textContent = "0";
+      selectedDni.textContent = "-";
+      lastSearch.textContent = "Última búsqueda: -";
+      tablaContenedor.className = "empty";
+      tablaContenedor.innerHTML = "Todavía no hay resultados.";
+      detalleContenedor.className = "empty";
+      detalleContenedor.innerHTML = "Selecciona una persona para ver la ficha completa.";
+      dniInput.placeholder = dniEjemplos[Math.floor(Math.random() * dniEjemplos.length)];
+      textoInput.placeholder = textoEjemplos[Math.floor(Math.random() * textoEjemplos.length)];
+    }
+
+    document.getElementById("btnDni").addEventListener("click", () => buscarPorDni());
+    document.getElementById("btnTexto").addEventListener("click", buscarPorTexto);
+    document.getElementById("btnLimpiar").addEventListener("click", limpiarTodo);
+
+    dniInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") buscarPorDni();
+    });
+
+    textoInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") buscarPorTexto();
+    });
+
+    verificarAPI();
+  </script>
+</body>
+</html>
