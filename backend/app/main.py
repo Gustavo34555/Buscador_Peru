@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import os
 
 load_dotenv()
@@ -20,15 +22,14 @@ engine = create_engine(
     max_overflow=20
 )
 
-app = FastAPI(title="Buscador de Personas API")
+app = FastAPI()
 
 origins = [
+    "https://buscador-peru-1.onrender.com",
     "http://127.0.0.1:5500",
     "http://localhost:5500",
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
 ]
 
 app.add_middleware(
@@ -38,7 +39,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/")
 def root():
